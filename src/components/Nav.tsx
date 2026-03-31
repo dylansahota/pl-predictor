@@ -17,19 +17,32 @@ export default function Nav({ active }: { active: string }) {
   }
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-100 bg-white">
-      <div className="max-w-lg mx-auto flex">
-        {LINKS.map(l => (
-          <Link key={l.href} href={l.href}
-            className={`flex-1 py-3 text-center text-sm transition-colors ${active === l.href.slice(1) ? "font-medium text-black" : "text-gray-400"}`}>
+    <nav style={{
+      position: "fixed", bottom: 0, left: 0, right: 0,
+      background: "#0d1016",
+      borderTop: "1px solid #1e2230",
+      display: "flex",
+      paddingBottom: "env(safe-area-inset-bottom)",
+    }}>
+      {LINKS.map(l => {
+        const isActive = active === l.href.slice(1)
+        return (
+          <Link key={l.href} href={l.href} style={{
+            flex: 1, padding: "14px 0", textAlign: "center",
+            fontSize: 13, fontWeight: isActive ? 600 : 400,
+            color: isActive ? "#4ade80" : "#444c5e",
+            textDecoration: "none", letterSpacing: isActive ? "0.01em" : 0,
+          }}>
             {l.label}
           </Link>
-        ))}
-        <button onClick={handleSignOut}
-          className="px-4 py-3 text-xs text-gray-300 hover:text-gray-500 transition-colors">
-          Out
-        </button>
-      </div>
+        )
+      })}
+      <button onClick={handleSignOut} style={{
+        padding: "14px 16px", fontSize: 12, color: "#333",
+        border: "none", background: "none", cursor: "pointer",
+      }}>
+        Out
+      </button>
     </nav>
   )
 }

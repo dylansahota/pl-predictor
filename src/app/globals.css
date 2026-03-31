@@ -2,3 +2,30 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root {
+  --bg:        #0f1117;
+  --bg-card:   #181c24;
+  --bg-input:  #0f1117;
+  --border:    #252a35;
+  --text:      #ffffff;
+  --text-muted:#666c7a;
+  --text-dim:  #3a3f4d;
+  --accent:    #4ade80;
+  --accent-bg: #111a13;
+  --accent-dim:#1a3a1f;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-manrope), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
+input[type="number"] { -moz-appearance: textfield; }
