@@ -4,7 +4,7 @@ import Nav from "@/components/Nav"
 
 const PLAYERS = ["All", "Damien", "Tunde", "Gowth", "Dyl"]
 
-interface Pick {
+interface PlayerPick {
   id: string
   team_picked: string
   pred_winner: string
@@ -17,7 +17,7 @@ interface Pick {
   fixtures: { home_team: string; away_team: string; home_score: number | null; away_score: number | null }
 }
 
-export default function HistoryClient({ picks, session }: { picks: Pick[]; session: { playerName: string } }) {
+export default function HistoryClient({ picks, session }: { picks: PlayerPick[]; session: { playerName: string } }) {
   const [filter, setFilter] = useState("All")
 
   const filtered = filter === "All" ? picks : picks.filter(p => p.players.name === filter)
