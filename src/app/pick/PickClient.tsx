@@ -171,9 +171,14 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
                           <span className="text-xs text-gray-300">vs</span>
                           <span className={`text-sm ${awayAvail ? "font-medium" : "text-gray-400 line-through"}`}>{f.away_team}</span>
                         </div>
-                        <span className="text-xs text-gray-400">
-                          {new Date(f.kickoff).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
-                        </span>
+                        <div className="text-right">
+                          <div className="text-xs text-gray-400">
+                            {new Date(f.kickoff).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {new Date(f.kickoff).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })}
+                          </div>
+                        </div>
                       </div>
                     </button>
                   )
