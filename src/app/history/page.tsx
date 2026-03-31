@@ -19,3 +19,4 @@ export default async function HistoryPage() {
     .order("gw_number", { referencedTable: "gameweeks", ascending: false })
 
   return <HistoryClient picks={(picks ?? []) as any} session={session} />
+
