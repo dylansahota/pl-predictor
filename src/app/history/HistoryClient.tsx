@@ -78,3 +78,4 @@ export default function HistoryClient({ picks, session }: { picks: PlayerPick[];
     </div>
   )
 }
+
