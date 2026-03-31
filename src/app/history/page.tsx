@@ -1,3 +1,4 @@
+
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
@@ -17,5 +18,4 @@ export default async function HistoryPage() {
     `)
     .order("gw_number", { referencedTable: "gameweeks", ascending: false })
 
-  return <HistoryClient picks={picks ?? []} session={session} />
-}
+  return <HistoryClient picks={(picks ?? []) as any} session={session} />
