@@ -178,44 +178,46 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
               const sel = selectedFixture?.id === f.id
               const ko = formatKO(f.kickoff)
               return (
-                <div key={f.id} style={c.fixtureRow(sel, anyAvail)} onClick={() => anyAvail && handleFixtureSelect(f)}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={c.teamName(homeAvail)}>{f.home_team}</span>
-                    <span style={c.vs}>vs</span>
-                    <span style={c.teamName(awayAvail)}>{f.away_team}</span>
+                <div key={f.id}>
+                  <div style={c.fixtureRow(sel, anyAvail)} onClick={() => anyAvail && handleFixtureSelect(f)}>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <span style={c.teamName(homeAvail)}>{f.home_team}</span>
+                      <span style={c.vs}>vs</span>
+                      <span style={c.teamName(awayAvail)}>{f.away_team}</span>
+                    </div>
+                    <div style={c.koWrap}>
+                      <div style={c.koDate}>{ko.date}</div>
+                      <div style={c.koTime}>{ko.time}</div>
+                    </div>
                   </div>
-                  <div style={c.koWrap}>
-                    <div style={c.koDate}>{ko.date}</div>
-                    <div style={c.koTime}>{ko.time}</div>
-                  </div>
+
+                  {sel && (
+                    <div style={{ ...c.scoreBox, marginTop: -4, borderTopLeftRadius: 0, borderTopRightRadius: 0, borderTop: "none" }}>
+                      <div style={c.sectionLabel}>Predict the score</div>
+                      <div style={c.scoreRow}>
+                        <span style={{ ...c.teamLbl, textAlign: "right" }}>{f.home_team}</span>
+                        <input type="number" min={0} max={9} value={predHome} onChange={e => setPredHome(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
+                        <span style={c.scoreSep}>–</span>
+                        <input type="number" min={0} max={9} value={predAway} onChange={e => setPredAway(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
+                        <span style={c.teamLbl}>{f.away_team}</span>
+                      </div>
+                      <div style={c.divider}>
+                        <div style={c.winLabel}>Who wins?</div>
+                        <div style={c.winnerRow}>
+                          {[f.home_team, f.away_team].map(team => (
+                            <button key={team} style={c.winBtn(predWinner === team, !isTeamAvailable(team))}
+                              disabled={!isTeamAvailable(team)} onClick={() => setPredWinner(team)}>
+                              {team}
+                            </button>
+                          ))}
+                        </div>
+                        {mismatch && <p style={c.mismatch}>Score implies {impliedWinner} wins but you've picked {predWinner} — both saved, you'll get a point for whichever is correct.</p>}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )
             })}
-
-            {selectedFixture && (
-              <div style={c.scoreBox}>
-                <div style={c.sectionLabel}>Predict the score</div>
-                <div style={c.scoreRow}>
-                  <span style={{ ...c.teamLbl, textAlign: "right" }}>{selectedFixture.home_team}</span>
-                  <input type="number" min={0} max={9} value={predHome} onChange={e => setPredHome(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
-                  <span style={c.scoreSep}>–</span>
-                  <input type="number" min={0} max={9} value={predAway} onChange={e => setPredAway(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
-                  <span style={c.teamLbl}>{selectedFixture.away_team}</span>
-                </div>
-                <div style={c.divider}>
-                  <div style={c.winLabel}>Who wins?</div>
-                  <div style={c.winnerRow}>
-                    {[selectedFixture.home_team, selectedFixture.away_team].map(team => (
-                      <button key={team} style={c.winBtn(predWinner === team, !isTeamAvailable(team))}
-                        disabled={!isTeamAvailable(team)} onClick={() => setPredWinner(team)}>
-                        {team}
-                      </button>
-                    ))}
-                  </div>
-                  {mismatch && <p style={c.mismatch}>Score implies {impliedWinner} wins but you've picked {predWinner} — both saved, you'll get a point for whichever is correct.</p>}
-                </div>
-              </div>
-            )}
 
             {error && <p style={c.errTxt}>{error}</p>}
             <button style={c.submitBtn(!selectedFixture || !predWinner || submitting || submitted || !isMyTurn)} onClick={handleSubmit}

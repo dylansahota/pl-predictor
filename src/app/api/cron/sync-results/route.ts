@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
-import { fetchGWResults } from "@/lib/football-data"
+import { fetchGWFixtures, fetchGWResults } from "@/lib/football-data"
 import { calcPoints } from "@/lib/points"
 
 // Called by Vercel cron nightly Tue-Sun at 11pm.
@@ -63,6 +63,8 @@ export async function GET() {
 
     const hs = result.score.fullTime.home
     const as_ = result.score.fullTime.away
+
+    if (hs === null || as_ === null) continue
 
     const pts = calcPoints({
       predWinner: pick.pred_winner,
