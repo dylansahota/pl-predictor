@@ -17,6 +17,7 @@ interface Props {
   pickOrder: { position: number; player: { id: string; name: string } }[]
   unavailableTeams: string[]
   alreadyPicked: boolean
+  teamForm: Record<string, string[]>
 }
 
 const c = {
@@ -62,7 +63,7 @@ const c = {
   errTxt:   { fontSize: 13, color: "#e53e3e", marginBottom: 12 },
 }
 
-export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, unavailableTeams, alreadyPicked }: Props) {
+export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, unavailableTeams, alreadyPicked, teamForm }: Props) {
   const router = useRouter()
   const [selectedFixture, setSelectedFixture] = useState<Props["fixtures"][0] | null>(null)
   const [predWinner, setPredWinner] = useState<string | null>(null)
@@ -113,9 +114,26 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
   const formatKO = (kickoff: string) => {
     const d = new Date(kickoff)
     return {
-      date: d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }),
-      time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+      date: d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Europe/London" }),
+      time: d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }),
     }
+  }
+
+  const FormDots = ({ team, avail }: { team: string; avail: boolean }) => {
+    const form = teamForm[team] ?? []
+    if (form.length === 0) return null
+    const dotColor = (r: string) => {
+      if (r === "W") return avail ? "#4ade80" : "#1a4025"
+      if (r === "D") return avail ? "#fbbf24" : "#3a2e0a"
+      return avail ? "#e53e3e" : "#3a1414"
+    }
+    return (
+      <div style={{ display: "flex", gap: 3, marginTop: 4 }}>
+        {form.map((r, i) => (
+          <div key={i} style={{ width: 6, height: 6, borderRadius: 99, background: dotColor(r) }} />
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -181,9 +199,15 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
                 <div key={f.id}>
                   <div style={c.fixtureRow(sel, anyAvail)} onClick={() => anyAvail && handleFixtureSelect(f)}>
                     <div style={{ display: "flex", alignItems: "center" }}>
-                      <span style={c.teamName(homeAvail)}>{f.home_team}</span>
+                      <div>
+                        <span style={c.teamName(homeAvail)}>{f.home_team}</span>
+                        <FormDots team={f.home_team} avail={homeAvail} />
+                      </div>
                       <span style={c.vs}>vs</span>
-                      <span style={c.teamName(awayAvail)}>{f.away_team}</span>
+                      <div>
+                        <span style={c.teamName(awayAvail)}>{f.away_team}</span>
+                        <FormDots team={f.away_team} avail={awayAvail} />
+                      </div>
                     </div>
                     <div style={c.koWrap}>
                       <div style={c.koDate}>{ko.date}</div>

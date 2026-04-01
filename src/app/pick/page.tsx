@@ -57,6 +57,14 @@ export default async function PickPage() {
 
   const alreadyPicked = (gwPicks ?? []).some(p => p.player_id === session.playerId)
 
+  // Get team form
+  const { data: teamForm } = await supabaseAdmin
+    .from("team_form")
+    .select("team, form")
+
+  const formMap: Record<string, string[]> = {}
+  for (const tf of teamForm ?? []) formMap[tf.team] = tf.form
+
   return (
     <PickClient
       session={session}
@@ -66,6 +74,7 @@ export default async function PickPage() {
       pickOrder={(pickOrder ?? []).map(p => ({ position: p.position, player: p.players as any }))}
       unavailableTeams={unavailableTeams}
       alreadyPicked={alreadyPicked}
+      teamForm={formMap}
     />
   )
 }

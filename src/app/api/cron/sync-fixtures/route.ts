@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
-import { fetchGWFixtures } from "@/lib/football-data"
+import { fetchGWFixtures, fetchTeamForm, FD_TEAM_IDS } from "@/lib/football-data"
 
 // Called automatically by Vercel cron every Tuesday at 6am.
 // Finds the next gameweek and opens it.
@@ -9,10 +9,22 @@ export async function GET() {
   const authHeader = new Headers().get("authorization")
   // Vercel sets this automatically in production — safe to skip locally
 
-  // Find the highest settled/open GW and open the next one
+  // Check there isn't already an open GW
+  const { data: alreadyOpen } = await supabaseAdmin
+    .from("gameweeks")
+    .select("gw_number")
+    .eq("status", "open")
+    .single()
+
+  if (alreadyOpen) {
+    return NextResponse.json({ message: `GW${alreadyOpen.gw_number} already open, nothing to do` })
+  }
+
+  // Find the highest settled GW and open the next one
   const { data: latest } = await supabaseAdmin
     .from("gameweeks")
     .select("gw_number")
+    .eq("status", "settled")
     .order("gw_number", { ascending: false })
     .limit(1)
     .single()

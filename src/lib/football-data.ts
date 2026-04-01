@@ -1,56 +1,55 @@
-// Canonical team names — everything in the app uses these exact strings
-export const TEAM_NAME_MAP: Record<string, string> = {
-  // short names from API
-  "Tottenham":      "Spurs",
-  "Man United":     "Man Utd",
-  "Nottm Forest":   "Nott'm Forest",
-  "Nottingham":     "Nott'm Forest",
-  "Newcastle":      "Newcastle",
-  "West Ham":       "West Ham",
-  "Wolverhampton":  "Wolves",
-  "Brighton Hove":  "Brighton",
-  "Aston Villa":    "Aston Villa",
-  "Brentford":      "Brentford",
-  "Crystal Palace": "Crystal Palace",
-  "Bournemouth":    "Bournemouth",
-  "Fulham":         "Fulham",
-  "Arsenal":        "Arsenal",
-  "Chelsea":        "Chelsea",
-  "Liverpool":      "Liverpool",
-  "Everton":        "Everton",
-  "Leeds United":   "Leeds",
-  "Burnley":        "Burnley",
-  "Sunderland":     "Sunderland",
-  "Man City":       "Man City",
-  "Brighton":       "Brighton",
-  "Spurs":          "Spurs",
-  "Man Utd":        "Man Utd",
-  "Nott'm Forest":  "Nott'm Forest",
-  "Wolves":         "Wolves",
-  "Leeds":          "Leeds",
-  "Newcastle Utd":  "Newcastle",
-  // full name fallbacks
-  "Tottenham Hotspur":        "Spurs",
-  "Manchester City":          "Man City",
-  "Manchester United":        "Man Utd",
-  "Nottingham Forest":        "Nott'm Forest",
-  "Newcastle United":         "Newcastle",
-  "West Ham United FC":       "West Ham",
-  "Wolverhampton Wanderers":  "Wolves",
-  "Brighton & Hove Albion":   "Brighton",
-  "AFC Bournemouth":          "Bournemouth",
-  "Leeds United FC":          "Leeds",
-  "Burnley FC":               "Burnley",
-  "Sunderland AFC":           "Sunderland",
-}
-
-export function normTeamName(name: string): string {
-  return TEAM_NAME_MAP[name] ?? name
-}const BASE = "https://api.football-data.org/v4"
+const BASE        = "https://api.football-data.org/v4"
 const COMPETITION = "PL"
 
 const headers = {
   "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY!,
+}
+
+export const TEAM_NAME_MAP: Record<string, string> = {
+  "Tottenham":               "Spurs",
+  "Man United":              "Man Utd",
+  "Nottm Forest":            "Nott'm Forest",
+  "Nottingham":              "Nott'm Forest",
+  "Newcastle":               "Newcastle",
+  "West Ham":                "West Ham",
+  "Wolverhampton":           "Wolves",
+  "Brighton Hove":           "Brighton",
+  "Aston Villa":             "Aston Villa",
+  "Brentford":               "Brentford",
+  "Crystal Palace":          "Crystal Palace",
+  "Bournemouth":             "Bournemouth",
+  "Fulham":                  "Fulham",
+  "Arsenal":                 "Arsenal",
+  "Chelsea":                 "Chelsea",
+  "Liverpool":               "Liverpool",
+  "Everton":                 "Everton",
+  "Leeds United":            "Leeds",
+  "Burnley":                 "Burnley",
+  "Sunderland":              "Sunderland",
+  "Man City":                "Man City",
+  "Brighton":                "Brighton",
+  "Spurs":                   "Spurs",
+  "Man Utd":                 "Man Utd",
+  "Nott'm Forest":           "Nott'm Forest",
+  "Wolves":                  "Wolves",
+  "Leeds":                   "Leeds",
+  "Newcastle Utd":           "Newcastle",
+  "Tottenham Hotspur":       "Spurs",
+  "Manchester City":         "Man City",
+  "Manchester United":       "Man Utd",
+  "Nottingham Forest":       "Nott'm Forest",
+  "Newcastle United":        "Newcastle",
+  "West Ham United FC":      "West Ham",
+  "Wolverhampton Wanderers": "Wolves",
+  "Brighton & Hove Albion":  "Brighton",
+  "AFC Bournemouth":         "Bournemouth",
+  "Leeds United FC":         "Leeds",
+  "Burnley FC":              "Burnley",
+  "Sunderland AFC":          "Sunderland",
+}
+
+export function normTeamName(name: string): string {
+  return TEAM_NAME_MAP[name] ?? name
 }
 
 export interface FDFixture {
@@ -61,12 +60,9 @@ export interface FDFixture {
   score: {
     fullTime: { home: number | null; away: number | null }
   }
-  status: string // SCHEDULED | IN_PLAY | FINISHED | etc.
+  status: string
 }
 
-// Fetch all fixtures for a given gameweek.
-// For double gameweeks, a team can appear in 2 fixtures —
-// we deduplicate by keeping only the earliest kickoff per team.
 export async function fetchGWFixtures(gw: number): Promise<FDFixture[]> {
   const res = await fetch(
     `${BASE}/competitions/${COMPETITION}/matches?matchday=${gw}`,
@@ -81,7 +77,6 @@ export async function fetchGWFixtures(gw: number): Promise<FDFixture[]> {
     awayTeam: { ...m.awayTeam, shortName: normTeamName(m.awayTeam.shortName) },
   }))
 
-  // Deduplicate double GW: keep earliest fixture per team
   const earliest = new Map<string, FDFixture>()
   for (const m of matches) {
     for (const team of [m.homeTeam.shortName, m.awayTeam.shortName]) {
@@ -92,7 +87,6 @@ export async function fetchGWFixtures(gw: number): Promise<FDFixture[]> {
     }
   }
 
-  // Return deduplicated unique fixtures
   const seen = new Set<number>()
   return [...earliest.values()].filter(m => {
     if (seen.has(m.id)) return false
@@ -101,8 +95,52 @@ export async function fetchGWFixtures(gw: number): Promise<FDFixture[]> {
   })
 }
 
-// Fetch results for a settled gameweek
 export async function fetchGWResults(gw: number): Promise<FDFixture[]> {
   const fixtures = await fetchGWFixtures(gw)
   return fixtures.filter(m => m.status === "FINISHED")
+}
+
+export async function fetchTeamForm(fdTeamId: number, teamName: string): Promise<{ team: string; form: string[] }> {
+  const res = await fetch(
+    `${BASE}/teams/${fdTeamId}/matches?status=FINISHED&limit=5`,
+    { headers }
+  )
+  if (!res.ok) throw new Error(`football-data error ${res.status} for team ${teamName}`)
+  const data = await res.json()
+
+  const form = (data.matches as any[])
+    .slice(-5)
+    .map((m: any) => {
+      const isHome = normTeamName(m.homeTeam.shortName) === teamName
+      const hs = m.score.fullTime.home
+      const as_ = m.score.fullTime.away
+      if (hs === as_) return "D"
+      if (isHome) return hs > as_ ? "W" : "L"
+      return as_ > hs ? "W" : "L"
+    })
+
+  return { team: teamName, form }
+}
+
+export const FD_TEAM_IDS: Record<string, number> = {
+  "Arsenal":        57,
+  "Aston Villa":    58,
+  "Bournemouth":    1044,
+  "Brentford":      402,
+  "Brighton":       397,
+  "Burnley":        328,
+  "Chelsea":        61,
+  "Crystal Palace": 354,
+  "Everton":        62,
+  "Fulham":         63,
+  "Leeds":          341,
+  "Liverpool":      64,
+  "Man City":       65,
+  "Man Utd":        66,
+  "Newcastle":      67,
+  "Nott'm Forest":  351,
+  "Spurs":          73,
+  "Sunderland":     356,
+  "West Ham":       563,
+  "Wolves":         76,
 }
