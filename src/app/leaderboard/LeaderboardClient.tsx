@@ -1,8 +1,21 @@
 "use client"
 import { useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
+import { createClient } from "@supabase/supabase-js"
 import Nav from "@/components/Nav"
 
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
 const PLAYERS = ["Damien", "Tunde", "Gowth", "Dyl"]
+const ALL_TEAMS = [
+  "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton",
+  "Burnley","Chelsea","Crystal Palace","Everton","Fulham",
+  "Leeds","Liverpool","Man City","Man Utd","Newcastle",
+  "Nott'm Forest","Spurs","Sunderland","West Ham","Wolves",
+]
 const PLAYER_COLORS: Record<string, string> = {
   Damien: "#4ade80",
   Tunde:  "#60a5fa",
@@ -191,22 +204,56 @@ export default function LeaderboardClient({ allPicks, currentGW, currentGWPicks,
           </>
         )}
 
-        <div style={c.sectionLabel}>Teams used (GW20+)</div>
-        {PLAYERS.map(name => {
-          const used = teamsUsed(name)
-          return (
-            <div key={name} style={c.teamCard}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: "#ddd" }}>{name}</span>
-                <span style={{ fontSize: 11, color: "#555" }}>{20 - used.length} of 20 left</span>
+        <div style={c.sectionLabel}>Available teams (GW20+)</div>
+        <div style={{ background: "#181c24", border: "1px solid #252a35", borderRadius: 12, overflow: "hidden", marginBottom: 8 }}>
+          {/* Header row */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr repeat(4, 36px)", gap: 0, borderBottom: "1px solid #252a35" }}>
+            <div style={{ padding: "10px 12px", fontSize: 11, color: "#555", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const }}>Team</div>
+            {PLAYERS.map(name => (
+              <div key={name} style={{ padding: "10px 4px", fontSize: 10, color: PLAYER_COLORS[name], fontWeight: 700, textAlign: "center" as const, letterSpacing: "0.02em" }}>
+                {name.slice(0, 3).toUpperCase()}
               </div>
-              <div>
-                {used.map(t => <span key={t} style={c.teamTag}>{t}</span>)}
-                {used.length === 0 && <span style={{ fontSize: 12, color: "#333" }}>None yet</span>}
+            ))}
+          </div>
+          {/* Team rows */}
+          {ALL_TEAMS.map((team, i) => {
+            const availableFor = PLAYERS.filter(name => !teamsUsed(name).includes(team))
+            const allAvailable = availableFor.length === PLAYERS.length
+            const noneAvailable = availableFor.length === 0
+            return (
+              <div key={team} style={{
+                display: "grid", gridTemplateColumns: "1fr repeat(4, 36px)", gap: 0,
+                borderBottom: i < ALL_TEAMS.length - 1 ? "1px solid #1a1e28" : "none",
+                background: noneAvailable ? "#0d1016" : "transparent",
+              }}>
+                <div style={{ padding: "9px 12px", fontSize: 13, color: noneAvailable ? "#333" : allAvailable ? "#fff" : "#aaa", fontWeight: allAvailable ? 600 : 400 }}>
+                  {team}
+                </div>
+                {PLAYERS.map(name => {
+                  const used = teamsUsed(name).includes(team)
+                  return (
+                    <div key={name} style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "9px 4px" }}>
+                      {used
+                        ? <div style={{ width: 8, height: 8, borderRadius: 99, background: "#1e2230" }} />
+                        : <div style={{ width: 8, height: 8, borderRadius: 99, background: PLAYER_COLORS[name] }} />
+                      }
+                    </div>
+                  )
+                })}
               </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
+        <div style={{ display: "flex", gap: 16, padding: "4px 0 16px", flexWrap: "wrap" as const }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 99, background: "#4ade80" }} />
+            <span style={{ fontSize: 11, color: "#555" }}>available</span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+            <div style={{ width: 8, height: 8, borderRadius: 99, background: "#1e2230" }} />
+            <span style={{ fontSize: 11, color: "#555" }}>used</span>
+          </div>
+        </div>
       </div>
       <Nav active="leaderboard" />
     </div>
