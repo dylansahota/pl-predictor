@@ -220,9 +220,13 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
                       <div style={c.sectionLabel}>Predict the score</div>
                       <div style={c.scoreRow}>
                         <span style={{ ...c.teamLbl, textAlign: "right" }}>{f.home_team}</span>
-                        <input type="number" min={0} max={9} value={predHome} onChange={e => setPredHome(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
+                        <input type="number" min={0} max={9} value={predHome}
+                          onFocus={e => e.target.select()}
+                          onChange={e => setPredHome(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
                         <span style={c.scoreSep}>–</span>
-                        <input type="number" min={0} max={9} value={predAway} onChange={e => setPredAway(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
+                        <input type="number" min={0} max={9} value={predAway}
+                          onFocus={e => e.target.select()}
+                          onChange={e => setPredAway(Math.max(0, Math.min(9, +e.target.value)))} style={c.scoreInput} />
                         <span style={c.teamLbl}>{f.away_team}</span>
                       </div>
                       <div style={c.divider}>
