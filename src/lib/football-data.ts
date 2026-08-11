@@ -5,14 +5,14 @@ const headers = {
   "X-Auth-Token": process.env.FOOTBALL_DATA_API_KEY!,
 }
 
+// 2026/27 Premier League. Maps every name variant football-data.org returns
+// (shortName and full name) to the canonical short name we store and display.
 export const TEAM_NAME_MAP: Record<string, string> = {
   "Tottenham":               "Spurs",
   "Man United":              "Man Utd",
   "Nottm Forest":            "Nott'm Forest",
   "Nottingham":              "Nott'm Forest",
   "Newcastle":               "Newcastle",
-  "West Ham":                "West Ham",
-  "Wolverhampton":           "Wolves",
   "Brighton Hove":           "Brighton",
   "Aston Villa":             "Aston Villa",
   "Brentford":               "Brentford",
@@ -24,28 +24,32 @@ export const TEAM_NAME_MAP: Record<string, string> = {
   "Liverpool":               "Liverpool",
   "Everton":                 "Everton",
   "Leeds United":            "Leeds",
-  "Burnley":                 "Burnley",
   "Sunderland":              "Sunderland",
+  "Coventry City":           "Coventry",
+  "Hull City":               "Hull",
+  "Ipswich Town":            "Ipswich",
   "Man City":                "Man City",
   "Brighton":                "Brighton",
   "Spurs":                   "Spurs",
   "Man Utd":                 "Man Utd",
   "Nott'm Forest":           "Nott'm Forest",
-  "Wolves":                  "Wolves",
   "Leeds":                   "Leeds",
+  "Coventry":                "Coventry",
+  "Hull":                    "Hull",
+  "Ipswich":                 "Ipswich",
   "Newcastle Utd":           "Newcastle",
   "Tottenham Hotspur":       "Spurs",
   "Manchester City":         "Man City",
   "Manchester United":       "Man Utd",
   "Nottingham Forest":       "Nott'm Forest",
   "Newcastle United":        "Newcastle",
-  "West Ham United FC":      "West Ham",
-  "Wolverhampton Wanderers": "Wolves",
   "Brighton & Hove Albion":  "Brighton",
   "AFC Bournemouth":         "Bournemouth",
   "Leeds United FC":         "Leeds",
-  "Burnley FC":              "Burnley",
   "Sunderland AFC":          "Sunderland",
+  "Coventry City FC":        "Coventry",
+  "Hull City AFC":           "Hull",
+  "Ipswich Town FC":         "Ipswich",
 }
 
 export function normTeamName(name: string): string {
@@ -122,17 +126,22 @@ export async function fetchTeamForm(fdTeamId: number, teamName: string): Promise
   return { team: teamName, form }
 }
 
+// football-data.org team IDs for the 2026/27 Premier League, keyed by our
+// canonical short name. Pulled live from /competitions/PL/teams — note several
+// IDs differ from prior seasons (e.g. Sunderland is now 71, not 356).
 export const FD_TEAM_IDS: Record<string, number> = {
   "Arsenal":        57,
   "Aston Villa":    58,
   "Bournemouth":    1044,
   "Brentford":      402,
   "Brighton":       397,
-  "Burnley":        328,
   "Chelsea":        61,
+  "Coventry":       1076,
   "Crystal Palace": 354,
   "Everton":        62,
   "Fulham":         63,
+  "Hull":           322,
+  "Ipswich":        349,
   "Leeds":          341,
   "Liverpool":      64,
   "Man City":       65,
@@ -140,7 +149,5 @@ export const FD_TEAM_IDS: Record<string, number> = {
   "Newcastle":      67,
   "Nott'm Forest":  351,
   "Spurs":          73,
-  "Sunderland":     356,
-  "West Ham":       563,
-  "Wolves":         76,
+  "Sunderland":     71,
 }

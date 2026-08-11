@@ -255,7 +255,7 @@ export default function PickClient({ session, gw, fixtures, gwPicks, pickOrder, 
           </>
         )}
       </div>
-      <Nav active="pick" />
+      <Nav active="pick" playerName={session.playerName} />
     </div>
   )
 }

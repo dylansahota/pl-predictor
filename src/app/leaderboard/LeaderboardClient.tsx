@@ -255,7 +255,7 @@ export default function LeaderboardClient({ allPicks, currentGW, currentGWPicks,
           </div>
         </div>
       </div>
-      <Nav active="leaderboard" />
+      <Nav active="leaderboard" playerName={session.playerName} />
     </div>
   )
 }

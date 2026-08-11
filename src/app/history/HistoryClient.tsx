@@ -75,7 +75,7 @@ export default function HistoryClient({ picks, session }: { picks: PlayerPick[];
           )
         })}
       </div>
-      <Nav active="history" />
+      <Nav active="history" playerName={session.playerName} />
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { supabaseAdmin } from "@/lib/supabase"
 import { getSession } from "@/lib/auth"
+import { reuseWindowStart } from "@/lib/season"
 
 export async function POST(req: Request) {
   const session = await getSession()
@@ -37,27 +38,23 @@ export async function POST(req: Request) {
     .single()
   if (!fixture) return NextResponse.json({ error: "Invalid fixture" }, { status: 400 })
 
-  // Check team hasn't been picked by this player since GW19
-  const { data: gwReset } = await supabaseAdmin
-    .from("gameweeks")
-    .select("id")
-    .eq("gw_number", 19)
-    .single()
+  // Check team hasn't been picked by this player within the current reuse
+  // window (resets mid-season — see reuseWindowStart).
+  const windowStart = reuseWindowStart(gw.gw_number)
 
   const { data: prevPicks } = await supabaseAdmin
     .from("picks")
     .select("team_picked, gw_id")
     .eq("player_id", session.playerId)
 
-  // Get all GW ids since reset
-  const { data: gwsSinceReset } = await supabaseAdmin
+  const { data: windowGws } = await supabaseAdmin
     .from("gameweeks")
-    .select("id, gw_number")
-    .gte("gw_number", 20)
+    .select("id")
+    .gte("gw_number", windowStart)
 
-  const gwIdsSinceReset = new Set(gwsSinceReset?.map(g => g.id) ?? [])
+  const windowGwIds = new Set((windowGws ?? []).map(g => g.id))
   const teamsUsed = (prevPicks ?? [])
-    .filter(p => gwIdsSinceReset.has(p.gw_id))
+    .filter(p => windowGwIds.has(p.gw_id))
     .map(p => p.team_picked)
 
   const teamPicked = predWinner === fixture.home_team ? fixture.home_team : fixture.away_team

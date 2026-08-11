@@ -8,8 +8,14 @@ const LINKS = [
   { href: "/leaderboard", label: "Leaderboard" },
 ]
 
-export default function Nav({ active }: { active: string }) {
+const ADMIN_PLAYER = "Dyl"
+
+export default function Nav({ active, playerName }: { active: string; playerName?: string }) {
   const router = useRouter()
+
+  const links = playerName === ADMIN_PLAYER
+    ? [...LINKS, { href: "/admin", label: "Admin" }]
+    : LINKS
 
   const handleSignOut = async () => {
     await fetch("/api/auth/logout", { method: "POST" })
@@ -24,7 +30,7 @@ export default function Nav({ active }: { active: string }) {
       display: "flex",
       paddingBottom: "env(safe-area-inset-bottom)",
     }}>
-      {LINKS.map(l => {
+      {links.map(l => {
         const isActive = active === l.href.slice(1)
         return (
           <Link key={l.href} href={l.href} style={{

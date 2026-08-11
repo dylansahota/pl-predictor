@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
+import { reuseWindowStart } from "@/lib/season"
 import PickClient from "./PickClient"
 
 export default async function PickPage() {
@@ -36,20 +37,19 @@ export default async function PickPage() {
     .eq("gw_id", gw.id)
     .order("position")
 
-  // Get all teams this player has picked since GW19 reset
-  const { data: resetGW } = await supabaseAdmin
-    .from("gameweeks").select("id").eq("gw_number", 19).single()
+  // Teams this player has already used within the current reuse window
+  const windowStart = reuseWindowStart(gw.gw_number)
 
-  const { data: gwsSinceReset } = await supabaseAdmin
-    .from("gameweeks").select("id").gte("gw_number", 20)
+  const { data: windowGws } = await supabaseAdmin
+    .from("gameweeks").select("id").gte("gw_number", windowStart)
 
-  const gwIdsSinceReset = (gwsSinceReset ?? []).map(g => g.id)
+  const windowGwIds = (windowGws ?? []).map(g => g.id)
 
   const { data: myPicks } = await supabaseAdmin
     .from("picks")
     .select("team_picked, gw_id")
     .eq("player_id", session.playerId)
-    .in("gw_id", gwIdsSinceReset)
+    .in("gw_id", windowGwIds)
 
   const teamsIveUsed = (myPicks ?? []).map(p => p.team_picked)
   const teamsTakenThisGW = (gwPicks ?? []).map(p => p.team_picked)

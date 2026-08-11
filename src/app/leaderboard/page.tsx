@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { supabaseAdmin } from "@/lib/supabase"
+import { reuseWindowStart } from "@/lib/season"
 import LeaderboardClient from "./LeaderboardClient"
 
 export default async function LeaderboardPage() {
@@ -22,15 +23,16 @@ export default async function LeaderboardPage() {
     .select("pred_winner, pred_home, pred_away, team_picked, players(name)")
     .eq("gw_id", gw.id) : { data: [] }
 
-  // Teams used per player since GW19
-  const { data: gwsSinceReset } = await supabaseAdmin
-    .from("gameweeks").select("id").gte("gw_number", 20)
-  const gwIdsSinceReset = (gwsSinceReset ?? []).map(g => g.id)
+  // Teams used per player within the current reuse window
+  const windowStart = reuseWindowStart(gw?.gw_number ?? 1)
+  const { data: windowGws } = await supabaseAdmin
+    .from("gameweeks").select("id").gte("gw_number", windowStart)
+  const windowGwIds = (windowGws ?? []).map(g => g.id)
 
   const { data: picksForTeamsUsed } = await supabaseAdmin
     .from("picks")
     .select("player_id, team_picked, players(id, name)")
-    .in("gw_id", gwIdsSinceReset)
+    .in("gw_id", windowGwIds)
 
   return (
     <LeaderboardClient
