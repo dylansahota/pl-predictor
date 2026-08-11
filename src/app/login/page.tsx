@@ -4,6 +4,16 @@ import { useRouter } from "next/navigation"
 
 const PLAYERS = ["Damien", "Tunde", "Gowth", "Dyl"]
 
+// 🏆 2025/26 champion — 29 pts. Long may he reign (until someone stops him).
+const REIGNING_CHAMP = "Gowth"
+const CHAMP_QUIPS = [
+  "👑 Reigning champion. 29 points of pure destiny.",
+  "👑 The champ returns. Everyone else is playing for second.",
+  "👑 Defending the crown. Mind the draught up there.",
+  "👑 Reigning champion — allegedly on merit.",
+  "👑 Last season's winner. He'll remind you. Repeatedly.",
+]
+
 const s = {
   page:    { minHeight: "100svh", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", background: "#0f1117" },
   wrap:    { width: "100%", maxWidth: 360 },
@@ -12,6 +22,7 @@ const s = {
   label:   { fontSize: 11, color: "#555", fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" as const, display: "block", marginBottom: 10 },
   pills:   { display: "flex", gap: 8, flexWrap: "wrap" as const, marginBottom: 28 },
   pill:    (a: boolean) => ({ padding: "10px 18px", borderRadius: 99, fontSize: 14, fontWeight: a ? 600 : 400, border: a ? "1.5px solid #4ade80" : "1px solid #252a35", background: a ? "#111a13" : "#181c24", color: a ? "#4ade80" : "#666", cursor: "pointer" }),
+  champ:   { fontSize: 12, color: "#d4a017", fontStyle: "italic" as const, margin: "-16px 0 24px", lineHeight: 1.4 },
   pins:    { display: "flex", gap: 12, marginBottom: 20 },
   pin:     (err: boolean) => ({ width: 64, height: 64, textAlign: "center" as const, fontSize: 26, fontWeight: 600, borderRadius: 12, border: `1.5px solid ${err ? "#e53e3e" : "#252a35"}`, background: "#181c24", color: "#fff", outline: "none" }),
   err:     { fontSize: 13, color: "#e53e3e", marginBottom: 16 },
@@ -24,6 +35,7 @@ export default function LoginPage() {
   const [pin, setPin] = useState(["", "", "", ""])
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [champQuip, setChampQuip] = useState("")
   const refs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
 
   const handleDigit = (i: number, val: string) => {
@@ -60,11 +72,16 @@ export default function LoginPage() {
         <div style={s.pills}>
           {PLAYERS.map(p => (
             <button key={p} style={s.pill(player === p)}
-              onClick={() => { setPlayer(p); setPin(["", "", "", ""]); setError("") }}>
-              {p}
+              onClick={() => {
+                setPlayer(p); setPin(["", "", "", ""]); setError("")
+                setChampQuip(p === REIGNING_CHAMP ? CHAMP_QUIPS[Math.floor(Math.random() * CHAMP_QUIPS.length)] : "")
+              }}>
+              {p}{p === REIGNING_CHAMP ? " 👑" : ""}
             </button>
           ))}
         </div>
+
+        {player === REIGNING_CHAMP && champQuip && <p style={s.champ}>{champQuip}</p>}
 
         <span style={s.label}>Enter your PIN</span>
         <div style={s.pins}>
